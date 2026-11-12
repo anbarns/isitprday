@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is it PR day?</title>
+<meta name="description" content="Live wind checks for PR attempts on your local climbs. Seconds gained or lost right now, and the best window this week.">
+<meta property="og:title" content="Is it PR day?">
+<meta property="og:description" content="Live wind checks for PR attempts on your local climbs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://isitprday.com/">
+<meta property="og:image" content="https://isitprday.com/og/home.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f1210">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Is it PR day?</h1>
+  <p class="sub">Live wind for PR attempts. Pick a climb.</p>
+  <div class="routes" id="routes"></div>
+  <p class="small" style="margin-top:24px">Verdicts use the weight and power you've entered on each route page (defaults until you do). Weather from Open-Meteo.</p>
+</div>
+
+<!-- Routes: add one script tag per route file, in the order you want them listed. -->
+<script src="routes/griffith.js"></script>
+
+<script src="assets/engine.js"></script>
+<script>
+(() => {
+const P = window.PR, box = document.getElementById("routes");
+Object.values(window.PR_ROUTES).forEach(async route => {
+  const a = document.createElement("a");
+  a.className = "rcard"; a.href = route.id + "/";
+  a.innerHTML = '<div class="top"><h2>'+route.name+'</h2><div class="tag meh">…</div></div><div class="small meta">'+route.area+'</div><div class="mono why" style="margin-top:8px">Checking the wind…</div>';
+  box.appendChild(a);
+  try{
+    const geo = await P.prepare(route);
+    a.querySelector(".meta").textContent = route.area + " · " + (geo.total/1609.34).toFixed(1) + " mi · " + Math.round(geo.gain*3.281) + " ft";
+    const s = P.loadSettings(route); s.power = P.defaultPower(s, route);
+    const wx = await P.fetchWeather(geo, 7);
+    const calib = P.calibrate(geo, s, route);
+    const now = P.evaluate(geo, s, calib, P.currentW(wx));
+    const wet = (wx[Math.floor(wx.length/2)].current.precipitation||0) > 0.1;
+    const v = P.verdictFor(now.gain, wet, s.thresh);
+    const tag = a.querySelector(".tag"); tag.className = "tag " + v.cls; tag.textContent = v.short;
+    const hours = P.computeHours(geo, s, calib, wx);
+    const best = P.bestWindows(hours, P.currentHourIndex(wx, hours), 1)[0];
+    a.querySelector(".why").textContent = "Now " + P.fmtSec(now.gain) + (best ? " · best this week " + P.fmtHour(best.time) + " (" + P.fmtSec(best.gain) + ")" : "");
+  }catch(err){
+    a.querySelector(".why").textContent = "Couldn't load weather.";
+  }
+});
+})();
+</script>
+</body>
+</html>
