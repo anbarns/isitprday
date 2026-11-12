@@ -63,7 +63,7 @@ function renderMap(perPiece, windFrom, label){
   });
   const [sx,sy]=pt(0), [ex,ey]=pt(n.length-1);
   o += '<circle cx="'+sx+'" cy="'+sy+'" r="6" fill="var(--ink)"/><text x="'+(sx+9)+'" y="'+(sy+4)+'">start</text>';
-  o += '<circle cx="'+ex+'" cy="'+ey+'" r="6" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="'+(ex+9)+'" y="'+(ey+4)+'">top</text>';
+  o += '<circle cx="'+ex+'" cy="'+ey+'" r="6" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="'+(ex+9)+'" y="'+(ey+4)+'">'+(route.kind === "sprint" ? "finish" : "top")+'</text>';
   const to = rad(windFrom+180), cx=W-42, cy=42, L=24, dx=Math.sin(to)*L, dy=-Math.cos(to)*L;
   o += '<g stroke="var(--ink)" stroke-width="2.5" fill="none"><circle cx="'+cx+'" cy="'+cy+'" r="30" stroke="var(--line)"/>' +
        '<line x1="'+(cx-dx)+'" y1="'+(cy-dy)+'" x2="'+(cx+dx)+'" y2="'+(cy+dy)+'"/></g>';
@@ -136,7 +136,7 @@ async function run(){
     $("title").textContent = "Is it PR day on " + route.name + "?";
     $("routeLine").innerHTML = (geo.total/1609.34).toFixed(2) + " mi · ~" + Math.round(geo.gain*3.281) + " ft gain · " + route.area +
       (route.strava ? ' · <a href="'+route.strava+'">Strava segment</a>' : "");
-    wx = await P.fetchWeather(geo, 7);
+    wx = await P.fetchWeather(geo, 7, route.tz);
     renderAll();
   }catch(err){
     $("verdict").className="verdict no";
@@ -182,7 +182,7 @@ function readRider(){
 }
 ["rRider","rBike","rPower","rFtp","rPrTime","rPrWatts"].forEach(id => $(id).addEventListener("input", readRider));
 document.querySelectorAll(".unit").forEach(b => b.onclick = () => { s.units = b.dataset.u; fill(); P.saveSettings(s, route); });
-$("useFtp").title = "Climbs this long are usually ridden at about " + Math.round((route.ftpPct||1)*100) + "% of FTP";
+$("useFtp").title = "Efforts this long are usually ridden at about " + Math.round((route.ftpPct||1)*100) + "% of FTP";
 $("useFtp").onclick = () => {
   const f = parseFloat($("rFtp").value); if(!(f > 0)) return;
   s.ftp = f; s.power = Math.round(f*(route.ftpPct||1)/5)*5; $("rPower").value = s.power; showWkg(); recalc();
@@ -212,5 +212,5 @@ $("copyBtn").onclick = async () => {
 
 fill();
 run();
-setInterval(async () => { try{ wx = await P.fetchWeather(geo, 7); renderAll(); }catch(e){} }, 15*60*1000);
+setInterval(async () => { try{ wx = await P.fetchWeather(geo, 7, route.tz); renderAll(); }catch(e){} }, 15*60*1000);
 })();

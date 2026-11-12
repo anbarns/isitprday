@@ -18,20 +18,24 @@ favicon.svg, apple-touch-icon.png
 
 ## Adding a route
 
-1. Create `routes/<id>.js` by copying `routes/griffith.js`. Set `id`, `name`, `area`, `strava`,
-   `ftpPct` (share of FTP for a climb that long: about 1.05 for 15 to 20 min, 0.95 for 40 to 60 min),
-   `factor` (0.92 to 0.95 if you have no real effort to tune from), optional `groupRide`, and `pts`
-   as `[lat, lon, elevation_m]` points from bottom to top. Elevation is optional; without it the
-   site looks it up.
-2. Copy the `griffith/` folder to `<id>/`. In its `index.html`, change the title and og tags,
-   `window.ROUTE_ID`, and the `routes/<id>.js` script tag.
+1. Create `routes/<id>.js` by copying an existing route file. Fields:
+   - `id`, `name`, `area`, `strava`
+   - `kind`: `"climb"` or `"sprint"` (changes wording and the explainer text)
+   - `ftpPct`: share of FTP for an effort that long (about 1.05 for 15 to 20 min, 0.95 for 40 to 60 min, 2.5 for a 30 s sprint)
+   - `factor`: model tuning from a real effort (0.92 for Griffith, 0.75 for Powell). Without one, 0.9 for climbs, 0.75 for sprints.
+   - `shelter`: share of the 10 m forecast wind felt at rider height (0.5 sheltered climb, 0.65 open road)
+   - `thresh`: seconds of help needed for a "Yes" (5 for a 15 min climb, 1 for a 30 s sprint)
+   - optional `groupRide: { name, dow, hour }` and `tz` (defaults to America/Los_Angeles)
+   - `pts`: `[lat, lon, elevation_m]` from start to finish
+2. Add the route to `ROUTES` in `build/make_pages.py` and run `python3 build/make_pages.py` from the site folder.
+   That writes `<id>/index.html` from `build/route-template.html`.
 3. Add `<script src="routes/<id>.js"></script>` to the homepage `index.html`.
-4. Optional: make `og/<id>.png` for the link preview.
+4. Optional: link preview image `og/<id>.png` (1200x630).
 
 ## Settings storage
 
-Weight, bike weight, FTP, units and model settings are shared across routes.
-Power and PR are saved per route. Everything lives in the visitor's own browser.
+Weight, bike weight, FTP, units, CdA and Crr are shared across routes.
+Power, PR, shelter factor and threshold are saved per route. Everything lives in the visitor's own browser.
 
 ## Share links
 

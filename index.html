@@ -21,13 +21,14 @@
 <body>
 <div class="wrap">
   <h1>Is it PR day?</h1>
-  <p class="sub">Live wind for PR attempts. Pick a climb.</p>
+  <p class="sub">Live wind for PR attempts. Pick a segment.</p>
   <div class="routes" id="routes"></div>
   <p class="small" style="margin-top:24px">Verdicts use the weight and power you've entered on each route page (defaults until you do). Weather from Open-Meteo.</p>
 </div>
 
 <!-- Routes: add one script tag per route file, in the order you want them listed. -->
 <script src="routes/griffith.js"></script>
+<script src="routes/powell.js"></script>
 
 <script src="assets/engine.js"></script>
 <script>
@@ -42,7 +43,7 @@ Object.values(window.PR_ROUTES).forEach(async route => {
     const geo = await P.prepare(route);
     a.querySelector(".meta").textContent = route.area + " · " + (geo.total/1609.34).toFixed(1) + " mi · " + Math.round(geo.gain*3.281) + " ft";
     const s = P.loadSettings(route); s.power = P.defaultPower(s, route);
-    const wx = await P.fetchWeather(geo, 7);
+    const wx = await P.fetchWeather(geo, 7, route.tz);
     const calib = P.calibrate(geo, s, route);
     const now = P.evaluate(geo, s, calib, P.currentW(wx));
     const wet = (wx[Math.floor(wx.length/2)].current.precipitation||0) > 0.1;

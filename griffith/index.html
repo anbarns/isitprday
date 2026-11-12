@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Is it PR day? Griffith Park Hill Climb</title>
-<meta name="description" content="Live wind check for the Griffith Park Hill Climb. Will the wind help or hurt your PR attempt right now, and when is the best window this week?">
+<meta name="description" content="Live wind check for Griffith Park Hill Climb. Will the wind help or hurt your PR attempt right now, and when is the best window this week?">
 <meta property="og:title" content="Is it PR day on Griffith?">
-<meta property="og:description" content="Live wind check for the Griffith Park Hill Climb. Seconds gained or lost, and the best window this week.">
+<meta property="og:description" content="Live wind check for Griffith Park Hill Climb. Seconds gained or lost, and the best window this week.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://isitprday.com/griffith/">
 <meta property="og:image" content="https://isitprday.com/og/griffith.png">
@@ -83,7 +83,7 @@
 
   <div class="card" style="margin-bottom:14px">
     <details>
-      <summary>Model settings</summary>
+      <summary>Model settings for this climb</summary>
       <div class="settings" style="margin-top:10px">
         <div><label>CdA (m²)</label><input type="number" id="sCda" step="0.01"></div>
         <div><label>Crr</label><input type="number" id="sCrr" step="0.001"></div>
@@ -96,9 +96,9 @@
 
   <div class="card faq">
     <div class="label">How it works</div>
-    <p>The climb is cut into ~100 m pieces, each with its own heading and grade. Hourly wind, temperature and pressure come from Open-Meteo at several points along the route. For every piece, the headwind or tailwind component is worked out from the angle between the wind and your heading.</p>
+    <p>The climb is cut into short pieces, each with its own heading and grade. Hourly wind, temperature and pressure come from Open-Meteo at several points along the route. For every piece, the headwind or tailwind component is worked out from the angle between the wind and your heading.</p>
     <p>Then it rides it: a standard cycling power model (gravity, rolling resistance, aero drag on air speed, air density from temperature and pressure) solves your speed on every piece at your power, with and without that wind. The difference is the number you see in seconds.</p>
-    <p><b>Your numbers.</b> Weight and power drive the time estimate and the size of the wind effect: faster riders feel the wind more. If you don't know what you'd hold, the FTP button uses a typical share of FTP for a climb this long. Adding a PR tunes the model to you.</p>
+    <p><b>Your numbers.</b> Weight and power drive the time estimate and the size of the wind effect: faster riders feel the wind more. If you don't know what you'd hold, the FTP button uses a typical share of FTP for an effort this long. Adding a PR tunes the model to you.</p>
     <p><b>Shelter factor.</b> Forecasts are for 10 m up in open air. You're at about 1.5 m on a road cut into a hillside, which knocks the wind down a lot. 0.5 is a reasonable start; tune it after a few rides where you know how it felt.</p>
     <p><b>Why climbs care less.</b> At 12 km/h on 7%, aero is a small share of your power, so even a decent tailwind is worth seconds, not minutes. The flatter parts are where the wind pays out.</p>
     <p class="small" id="dataStamp"></p>

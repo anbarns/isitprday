@@ -11,13 +11,16 @@ const store = {
 };
 
 // ---------- settings ----------
-// Rider and model settings are shared across routes. Power and PR are per route.
+// Rider and bike settings are shared across routes. Power, PR, shelter and threshold are per route,
+// since a 30 s sprint on open farmland and a 15 min climb in a canyon need different values.
 const RIDER_DEFAULTS = { riderLb:165, bikeLb:18, ftp:null, units:"lb" };
-const MODEL_DEFAULTS = { cda:0.36, crr:0.005, shelter:0.5, thresh:5 };
+const MODEL_DEFAULTS = { cda:0.36, crr:0.005 };
 function loadSettings(route){
   const rider = Object.assign({}, RIDER_DEFAULTS, store.get("ipd.rider", {}));
   const model = Object.assign({}, MODEL_DEFAULTS, store.get("ipd.model", {}));
-  const per = Object.assign({ power:null, prTime:"", prWatts:null }, store.get("ipd.route." + route.id, {}));
+  const per = Object.assign({ power:null, prTime:"", prWatts:null,
+    shelter: route.shelter != null ? route.shelter : 0.5, thresh: route.thresh != null ? route.thresh : 5 },
+    store.get("ipd.route." + route.id, {}));
   return Object.assign({}, rider, model, per);
 }
 function defaultPower(s, route){
@@ -27,8 +30,8 @@ function defaultPower(s, route){
 }
 function saveSettings(s, route){
   store.set("ipd.rider", { riderLb:s.riderLb, bikeLb:s.bikeLb, ftp:s.ftp, units:s.units });
-  store.set("ipd.model", { cda:s.cda, crr:s.crr, shelter:s.shelter, thresh:s.thresh });
-  store.set("ipd.route." + route.id, { power:s.power, prTime:s.prTime, prWatts:s.prWatts });
+  store.set("ipd.model", { cda:s.cda, crr:s.crr });
+  store.set("ipd.route." + route.id, { power:s.power, prTime:s.prTime, prWatts:s.prWatts, shelter:s.shelter, thresh:s.thresh });
 }
 
 // ---------- geo ----------
@@ -89,7 +92,7 @@ async function prepare(route){
 }
 
 // ---------- weather ----------
-async function fetchWeather(geo, days){
+async function fetchWeather(geo, days, tz){
   const s = geo.sampleIdx.map(i=>geo.nodes[i]);
   const vars = "temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,precipitation";
   const url = "https://api.open-meteo.com/v1/forecast" +
@@ -97,7 +100,7 @@ async function fetchWeather(geo, days){
     "&longitude=" + s.map(p=>p[1].toFixed(4)).join(",") +
     "&current=" + vars +
     "&hourly=" + vars + ",precipitation_probability,is_day" +
-    "&wind_speed_unit=ms&timezone=" + encodeURIComponent(TZ) + "&forecast_days=" + (days || 7);
+    "&wind_speed_unit=ms&timezone=" + encodeURIComponent(tz || TZ) + "&forecast_days=" + (days || 7);
   const r = await fetch(url);
   if(!r.ok) throw new Error("Weather request failed (" + r.status + ")");
   const j = await r.json();
@@ -177,11 +180,12 @@ const parseLocal = iso => { const [d,t]=iso.split("T"); const [y,mo,da]=d.split(
 const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const fmtHour = iso => { const p=parseLocal(iso); const h=p.hh%12||12; return DOW[p.dow]+" "+p.mo+"/"+p.da+" "+h+(p.hh<12?"am":"pm"); };
 
+const secs = x => { const a = Math.abs(x), s = a < 10 ? a.toFixed(1) : a.toFixed(0); return s + (s === "1.0" || s === "1" ? " second" : " seconds"); };
 function verdictFor(gain, wet, th){
   if(wet) return { cls:"no", v:"Wet roads.", short:"Wet", why:"Rain in the forecast. Not a PR day, whatever the wind says." };
-  if(gain >= th) return { cls:"yes", v:"Yes. Send it.", short:"Yes", why:"Tailwind is worth about " + gain.toFixed(0) + " seconds. Text the group chat." };
+  if(gain >= th) return { cls:"yes", v:"Yes. Send it.", short:"Yes", why:"Tailwind is worth about " + secs(gain) + ". Text the group chat." };
   if(gain > -th) return { cls:"meh", v:"Meh.", short:"Meh", why:"Wind is roughly a wash (" + fmtSec(gain) + "). Ride for the coffee." };
-  return { cls:"no", v:"No.", short:"No", why:"Headwind costs you about " + Math.abs(gain).toFixed(0) + " seconds. Save the legs." };
+  return { cls:"no", v:"No.", short:"No", why:"Headwind costs you about " + secs(gain) + ". Save the legs." };
 }
 
 window.PR = { KG, store, loadSettings, saveSettings, defaultPower, prepare, fetchWeather, currentW, hourW,

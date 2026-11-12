@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is it PR day? {name}</title>
+<meta name="description" content="Live wind check for {name}. Will the wind help or hurt your PR attempt right now, and when is the best window this week?">
+<meta property="og:title" content="Is it PR day on {short}?">
+<meta property="og:description" content="Live wind check for {name}. Seconds gained or lost, and the best window this week.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://isitprday.com/{id}/">
+<meta property="og:image" content="https://isitprday.com/og/{id}.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f1210">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav"><a class="brand" href="../">Is it PR day?</a><a href="../">All routes</a></nav>
+  <h1 id="title">Is it PR day?</h1>
+  <p class="sub" id="routeLine">Loading route…</p>
+
+  <div id="verdict" class="verdict meh"><div class="v">Checking the wind…</div><div class="why"></div></div>
+
+  <div class="card rider" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div class="label" style="margin:0">Your numbers</div>
+      <div class="row small">Units
+        <button class="unit" data-u="lb">lb</button><button class="unit" data-u="kg">kg</button>
+      </div>
+    </div>
+    <div class="settings">
+      <div><label>Your weight (<span class="u">lb</span>)</label><input type="number" id="rRider" step="1" inputmode="decimal"></div>
+      <div><label>Bike + kit (<span class="u">lb</span>)</label><input type="number" id="rBike" step="0.5" inputmode="decimal"></div>
+      <div><label>Power you'll hold (W)</label><input type="number" id="rPower" step="5" inputmode="numeric"><div class="small" id="rWkg"></div></div>
+      <div><label>Or estimate from FTP (W)</label><div class="row" style="flex-wrap:nowrap"><input type="number" id="rFtp" step="5" inputmode="numeric"><button id="useFtp">Use</button></div></div>
+    </div>
+    <details style="margin-top:10px">
+      <summary>Have a PR on this {noun}? Add it to sharpen the estimate (optional)</summary>
+      <div class="settings" style="margin-top:8px">
+        <div><label>PR time (m:ss)</label><input type="text" id="rPrTime" placeholder="15:39"></div>
+        <div><label>PR average power (W)</label><input type="number" id="rPrWatts" step="1" inputmode="numeric"></div>
+      </div>
+      <p class="small">With a PR, the model is tuned so your PR power reproduces your PR time in still air. Without one, it uses a default tuned from a real effort on this {noun}.</p>
+    </details>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <div class="mono" id="rEst"></div>
+      <div class="row"><button id="shareLink">Copy link with my numbers</button><span class="small" id="shareMsg"></span></div>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-bottom:14px">
+    <div class="card"><div class="label">Wind</div><div class="big mono" id="wSpeed">--</div><div class="small" id="wDir">--</div></div>
+    <div class="card"><div class="label">Gusts</div><div class="big mono" id="wGust">--</div><div class="small" id="wTemp">--</div></div>
+    <div class="card"><div class="label">Along the {noun}</div><div class="big mono" id="wAlong">--</div><div class="small" id="wAlongNote">at rider height</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><div class="label">Route wind map</div><div class="small" id="mapHour"></div></div>
+      <svg id="map" viewBox="0 0 400 320" width="100%"></svg>
+      <div class="small"><span class="pill pt">tailwind</span> <span class="pill ph">headwind</span> &nbsp;Arrow shows where the wind is blowing.</div>
+    </div>
+    <div class="card">
+      <div class="label">Best windows, next 7 days (daylight)</div>
+      <ol class="best mono" id="best"></ol>
+      <div id="groupWrap">
+        <div class="label" style="margin-top:14px" id="groupLabel"></div>
+        <ul class="best mono" id="weds" style="list-style:none;padding-left:0"></ul>
+      </div>
+      <div class="row" style="margin-top:12px"><button id="copyBtn">Copy group chat text</button><span class="small" id="copyMsg"></span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between"><div class="label">Hour by hour: seconds gained (up) or lost (down) vs. still air</div><div class="small">Tap a bar to inspect it</div></div>
+    <div class="hours"><svg id="chart" height="190"></svg></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <details>
+      <summary>Model settings for this {noun}</summary>
+      <div class="settings" style="margin-top:10px">
+        <div><label>CdA (m²)</label><input type="number" id="sCda" step="0.01"></div>
+        <div><label>Crr</label><input type="number" id="sCrr" step="0.001"></div>
+        <div><label>Shelter factor (0 to 1)</label><input type="number" id="sShelter" step="0.05" min="0" max="1"></div>
+        <div><label>"Send it" threshold (s)</label><input type="number" id="sThresh" step="1"></div>
+      </div>
+      <div class="row" style="margin-top:12px"><button id="saveSettings">Save and recalculate</button></div>
+    </details>
+  </div>
+
+  <div class="card faq">
+    <div class="label">How it works</div>
+    <p>The {noun} is cut into short pieces, each with its own heading and grade. Hourly wind, temperature and pressure come from Open-Meteo at several points along the route. For every piece, the headwind or tailwind component is worked out from the angle between the wind and your heading.</p>
+    <p>Then it rides it: a standard cycling power model (gravity, rolling resistance, aero drag on air speed, air density from temperature and pressure) solves your speed on every piece at your power, with and without that wind. The difference is the number you see in seconds.</p>
+    <p><b>Your numbers.</b> Weight and power drive the time estimate and the size of the wind effect: faster riders feel the wind more. If you don't know what you'd hold, the FTP button uses a typical share of FTP for an effort this long. Adding a PR tunes the model to you.</p>
+{faq}
+    <p class="small" id="dataStamp"></p>
+  </div>
+</div>
+<script>window.ROUTE_ID = "{id}";</script>
+<script src="../routes/{id}.js"></script>
+<script src="../assets/engine.js"></script>
+<script src="../assets/route.js"></script>
+</body>
+</html>
