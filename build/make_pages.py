@@ -1,5 +1,7 @@
 # Generates route pages from the template. Run from the site folder:  python3 build/make_pages.py
-import os
+import os, time
+# Bump on every deploy so phones never mix old and new files.
+VER = time.strftime("%Y%m%d%H%M")
 TPL = open(os.path.join(os.path.dirname(__file__), "route-template.html")).read()
 
 FAQ = {
@@ -13,11 +15,19 @@ FAQ = {
 ROUTES = [
   dict(id="griffith", name="Griffith Park Hill Climb", short="Griffith", kind="climb"),
   dict(id="powell", name="Powell Sprint", short="Powell", kind="sprint"),
+  dict(id="lida", name="Lida Climb", short="Lida", kind="climb"),
 ]
 
 for r in ROUTES:
     html = (TPL.replace("{id}", r["id"]).replace("{name}", r["name"]).replace("{short}", r["short"])
-               .replace("{noun}", r["kind"]).replace("{faq}", FAQ[r["kind"]]))
+               .replace("{noun}", r["kind"]).replace("{ver}", VER).replace("{faq}", FAQ[r["kind"]]))
     os.makedirs(r["id"], exist_ok=True)
     open(os.path.join(r["id"], "index.html"), "w").write(html)
     print("wrote", r["id"] + "/index.html")
+
+# Homepage: stamp the same version on its local scripts and stylesheet.
+import re
+home = open("index.html").read()
+home = re.sub(r'((?:src|href)="(?:assets|routes)/[^"?]+)(?:\?v=\w+)?"', lambda m: m.group(1) + '?v=' + VER + '"', home)
+open("index.html", "w").write(home)
+print("stamped index.html", VER)
