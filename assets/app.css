@@ -52,3 +52,13 @@
   .rcard h2{margin:0;font-size:20px}
   .rcard .tag{font-size:22px;font-weight:800}
   .tag.yes{color:var(--tail)} .tag.meh{color:var(--neutral)} .tag.no{color:var(--head)}
+  /* route map */
+  .mapwrap{position:relative;margin:8px 0}
+  #lmap{height:340px;border-radius:10px;overflow:hidden;background:#0f1210}
+  #windArrow{position:absolute;top:10px;left:10px;z-index:500;pointer-events:none;background:rgba(15,18,16,.75);border-radius:50%}
+  .leaflet-container{font:12px Inter,system-ui,sans-serif}
+  .leaflet-control-attribution{background:rgba(15,18,16,.75)!important;color:#8b948c}
+  .leaflet-control-attribution a{color:#c3c9c3}
+  .leaflet-control-layers,.leaflet-bar a{background:#171b18;color:#e9ece8;border-color:#333b34}
+  .leaflet-control-layers-expanded{color:#e9ece8}
+  .leaflet-tooltip{background:#171b18;color:#e9ece8;border:1px solid #333b34}

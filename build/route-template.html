@@ -16,6 +16,7 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="../assets/app.css">
 </head>
 <body>
@@ -62,7 +63,8 @@
   <div class="grid g2" style="margin-bottom:14px">
     <div class="card">
       <div class="row" style="justify-content:space-between"><div class="label">Route wind map</div><div class="small" id="mapHour"></div></div>
-      <svg id="map" viewBox="0 0 400 320" width="100%"></svg>
+      <div class="mapwrap"><div id="lmap"></div><svg id="windArrow" viewBox="0 0 76 76" width="76" height="76"></svg></div>
+      <svg id="map" viewBox="0 0 400 320" width="100%" style="display:none"></svg>
       <div class="small"><span class="pill pt">tailwind</span> <span class="pill ph">headwind</span> &nbsp;Arrow shows where the wind is blowing.</div>
     </div>
     <div class="card">
@@ -105,6 +107,7 @@
 </div>
 <script>window.ROUTE_ID = "{id}";</script>
 <script src="../routes/{id}.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="../assets/engine.js"></script>
 <script src="../assets/route.js"></script>
 </body>

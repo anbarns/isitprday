@@ -45,8 +45,59 @@ function renderNow(){
   renderMap(res.perPiece, c.wind_direction_10m, "Now");
 }
 
+// ---------- map: Leaflet with dark street map + satellite; SVG fallback if Leaflet can't load ----------
+const TAIL = "#3fb27f", HEAD = "#e0614a", INK = "#e9ece8";
+let lmap = null, lineLayer = null;
+function initMap(){
+  if(lmap) return true;
+  if(!window.L) return false;
+  const dark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    { attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>', subdomains:"abcd", maxZoom:19 });
+  const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { attribution:"Imagery &copy; Esri", maxZoom:19 });
+  lmap = L.map("lmap", { zoomControl:false, scrollWheelZoom:false, layers:[dark] });
+  L.control.layers({ "Map": dark, "Satellite": sat }, null, { position:"topright" }).addTo(lmap);
+  L.control.zoom({ position:"bottomleft" }).addTo(lmap);
+  lmap.createPane("ends"); lmap.getPane("ends").style.zIndex = 450;
+  lineLayer = L.layerGroup().addTo(lmap);
+  const ll = geo.nodes.map(n => [n[0], n[1]]);
+  lmap.fitBounds(L.latLngBounds(ll), { padding:[36, 36] });
+  L.circleMarker(ll[0], { pane:"ends", radius:7, color:INK, weight:2, fillColor:INK, fillOpacity:1 })
+    .bindTooltip("start", { direction:"top" }).addTo(lmap);
+  L.circleMarker(ll[ll.length-1], { pane:"ends", radius:7, color:INK, weight:3, fillColor:"#0f1210", fillOpacity:1 })
+    .bindTooltip(route.kind === "sprint" ? "finish" : "top", { direction:"top" }).addTo(lmap);
+  return true;
+}
+
+function renderWindArrow(windFrom){
+  const to = P.rad(windFrom + 180), c = 38, L2 = 22, dx = Math.sin(to)*L2, dy = -Math.cos(to)*L2;
+  const ax = c+dx, ay = c+dy;
+  const l1 = [ax-Math.sin(to-0.5)*9, ay+Math.cos(to-0.5)*9], l2 = [ax-Math.sin(to+0.5)*9, ay+Math.cos(to+0.5)*9];
+  $("windArrow").innerHTML =
+    '<circle cx="38" cy="38" r="34" fill="none" stroke="#333b34" stroke-width="1.5"/>' +
+    '<text x="38" y="14" text-anchor="middle" style="fill:#8b948c;font:10px Inter,sans-serif">N</text>' +
+    '<line x1="'+(c-dx)+'" y1="'+(c-dy)+'" x2="'+ax+'" y2="'+ay+'" stroke="'+INK+'" stroke-width="2.5"/>' +
+    '<polygon points="'+ax+','+ay+' '+l1.join(',')+' '+l2.join(',')+'" fill="'+INK+'"/>';
+}
+
 function renderMap(perPiece, windFrom, label){
-  const n = geo.nodes, W=400, H=320, pad=28, rad = P.rad;
+  $("mapHour").textContent = label;
+  if(!initMap()) return renderSvgMap(perPiece, windFrom);
+  renderWindArrow(windFrom);
+  lineLayer.clearLayers();
+  const n = geo.nodes, maxHw = Math.max(1, ...perPiece.map(Math.abs));
+  perPiece.forEach((hw, i) => {
+    L.polyline([[n[i][0], n[i][1]], [n[i+1][0], n[i+1][1]]], {
+      color: hw < 0 ? TAIL : HEAD, weight: 7, lineCap: "round",
+      opacity: 0.45 + 0.55*Math.min(1, Math.abs(hw)/maxHw)
+    }).addTo(lineLayer);
+  });
+}
+
+// Fallback drawing when the map library is unavailable.
+function renderSvgMap(perPiece, windFrom){
+  $("lmap").style.display = "none"; $("windArrow").style.display = "none"; $("map").style.display = "";
+  const n = geo.nodes, W=400, H=320, pad=40, rad = P.rad;
   const lat0 = n.reduce((a,p)=>a+p[0],0)/n.length, kx = Math.cos(rad(lat0));
   const xs = n.map(p=>p[1]*kx), ys = n.map(p=>p[0]);
   const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
@@ -57,22 +108,12 @@ function renderMap(perPiece, windFrom, label){
   let o = "";
   perPiece.forEach((hw,i)=>{
     const [x1,y1]=pt(i), [x2,y2]=pt(i+1);
-    const col = hw < 0 ? "var(--tail)" : "var(--head)";
-    const op = 0.35 + 0.65*Math.min(1, Math.abs(hw)/maxHw);
-    o += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-opacity="'+op.toFixed(2)+'" stroke-width="7" stroke-linecap="round"/>';
+    o += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(hw < 0 ? TAIL : HEAD)+'" stroke-opacity="'+(0.35 + 0.65*Math.min(1, Math.abs(hw)/maxHw)).toFixed(2)+'" stroke-width="7" stroke-linecap="round"/>';
   });
   const [sx,sy]=pt(0), [ex,ey]=pt(n.length-1);
-  o += '<circle cx="'+sx+'" cy="'+sy+'" r="6" fill="var(--ink)"/><text x="'+(sx+9)+'" y="'+(sy+4)+'">start</text>';
-  o += '<circle cx="'+ex+'" cy="'+ey+'" r="6" fill="none" stroke="var(--ink)" stroke-width="2"/><text x="'+(ex+9)+'" y="'+(ey+4)+'">'+(route.kind === "sprint" ? "finish" : "top")+'</text>';
-  const to = rad(windFrom+180), cx=W-42, cy=42, L=24, dx=Math.sin(to)*L, dy=-Math.cos(to)*L;
-  o += '<g stroke="var(--ink)" stroke-width="2.5" fill="none"><circle cx="'+cx+'" cy="'+cy+'" r="30" stroke="var(--line)"/>' +
-       '<line x1="'+(cx-dx)+'" y1="'+(cy-dy)+'" x2="'+(cx+dx)+'" y2="'+(cy+dy)+'"/></g>';
-  const ax=cx+dx, ay=cy+dy;
-  const l1=[ax-Math.sin(to-0.5)*9, ay+Math.cos(to-0.5)*9], l2=[ax-Math.sin(to+0.5)*9, ay+Math.cos(to+0.5)*9];
-  o += '<polygon points="'+ax+','+ay+' '+l1.join(',')+' '+l2.join(',')+'" fill="var(--ink)"/>';
-  o += '<text x="'+(cx-8)+'" y="'+(cy-34)+'">N↑</text>';
+  o += '<circle cx="'+sx+'" cy="'+sy+'" r="6" fill="'+INK+'"/><text x="'+sx+'" y="'+(sy-12)+'" text-anchor="middle">start</text>';
+  o += '<circle cx="'+ex+'" cy="'+ey+'" r="6" fill="none" stroke="'+INK+'" stroke-width="2"/><text x="'+ex+'" y="'+(ey-12)+'" text-anchor="middle">'+(route.kind === "sprint" ? "finish" : "top")+'</text>';
   $("map").innerHTML = o;
-  $("mapHour").textContent = label;
 }
 
 function renderChart(){
@@ -135,7 +176,7 @@ async function run(){
     geo = await P.prepare(route);
     $("title").textContent = "Is it PR day on " + route.name + "?";
     $("routeLine").innerHTML = (geo.total/1609.34).toFixed(2) + " mi · ~" + Math.round(geo.gain*3.281) + " ft gain · " + route.area +
-      (route.strava ? ' · <a href="'+route.strava+'">Strava segment</a>' : "");
+      (route.strava ? ' · <a href="'+route.strava+'" target="_blank" rel="noopener">Strava segment</a>' : "");
     wx = await P.fetchWeather(geo, 7, route.tz);
     renderAll();
   }catch(err){
