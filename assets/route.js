@@ -51,9 +51,15 @@ let lmap = null, lineLayer = null;
 function initMap(){
   if(lmap) return true;
   if(!window.L) return false;
-  const dark = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    { attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>', subdomains:"abcd", maxZoom:19 });
-  const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  // Esri dark gray canvas (base + labels). No API key needed, same host as the satellite layer.
+  const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/";
+  const dark = L.layerGroup([
+    L.tileLayer(esri + "Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      { attribution:"Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors", maxNativeZoom:16, maxZoom:19 }),
+    L.tileLayer(esri + "Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+      { maxNativeZoom:16, maxZoom:19 })
+  ]);
+  const sat = L.tileLayer(esri + "World_Imagery/MapServer/tile/{z}/{y}/{x}",
     { attribution:"Imagery &copy; Esri", maxZoom:19 });
   lmap = L.map("lmap", { zoomControl:false, scrollWheelZoom:false, layers:[dark] });
   L.control.layers({ "Map": dark, "Satellite": sat }, null, { position:"topright" }).addTo(lmap);
