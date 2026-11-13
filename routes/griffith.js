@@ -4,6 +4,8 @@ window.PR_ROUTES["griffith"] = {
   id: "griffith",
   name: "Griffith Park Hill Climb",
   area: "Griffith Park, Los Angeles",
+  // Homepage groups routes under this heading.
+  state: "California",
   strava: "https://www.strava.com/segments/966059",
   // Typical share of FTP held on this climb (15 to 20 minutes).
   ftpPct: 1.05,

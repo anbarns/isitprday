@@ -19,7 +19,7 @@ favicon.svg, apple-touch-icon.png
 ## Adding a route
 
 1. Create `routes/<id>.js` by copying an existing route file. Fields:
-   - `id`, `name`, `area`, `strava`
+   - `id`, `name`, `area` (town or park, no state), `state` (homepage heading, e.g. "California"), `strava`
    - `kind`: `"climb"` or `"sprint"` (changes wording and the explainer text)
    - `ftpPct`: share of FTP for an effort that long (about 1.05 for 15 to 20 min, 0.95 for 40 to 60 min, 2.5 for a 30 s sprint)
    - `factor`: model tuning from a real effort (0.92 for Griffith, 0.75 for Powell). Without one, 0.9 for climbs, 0.75 for sprints.

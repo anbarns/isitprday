@@ -62,3 +62,6 @@
   .leaflet-control-layers,.leaflet-bar a{background:#171b18;color:#e9ece8;border-color:#333b34}
   .leaflet-control-layers-expanded{color:#e9ece8}
   .leaflet-tooltip{background:#171b18;color:#e9ece8;border:1px solid #333b34}
+  /* homepage state groups */
+  .stategroup{margin-bottom:26px}
+  .statehead{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:0 0 10px}

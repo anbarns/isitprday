@@ -3,7 +3,9 @@ window.PR_ROUTES = window.PR_ROUTES || {};
 window.PR_ROUTES["powell"] = {
   id: "powell",
   name: "Powell Sprint",
-  area: "Fidalgo Island, WA",
+  area: "Whidbey Island",
+  // Homepage groups routes under this heading.
+  state: "Washington",
   strava: "https://www.strava.com/segments/21574757",
   kind: "sprint",
   // Share of FTP for an all-out ~30 second effort.

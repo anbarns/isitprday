@@ -3,7 +3,9 @@ window.PR_ROUTES = window.PR_ROUTES || {};
 window.PR_ROUTES["lida"] = {
   id: "lida",
   name: "Lida Climb",
-  area: "Pasadena, CA",
+  area: "Pasadena",
+  // Homepage groups routes under this heading.
+  state: "California",
   strava: "https://www.strava.com/segments/2261684",
   kind: "climb",
   // Share of FTP for a 6 to 8 minute climb.

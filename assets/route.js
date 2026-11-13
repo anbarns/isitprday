@@ -181,7 +181,7 @@ async function run(){
   try{
     geo = await P.prepare(route);
     $("title").textContent = "Is it PR day on " + route.name + "?";
-    $("routeLine").innerHTML = (geo.total/1609.34).toFixed(2) + " mi · ~" + Math.round(geo.gain*3.281) + " ft gain · " + route.area +
+    $("routeLine").innerHTML = (geo.total/1609.34).toFixed(2) + " mi · ~" + Math.round(geo.gain*3.281) + " ft gain · " + route.area + (route.state ? ", " + route.state : "") +
       (route.strava ? ' · <a href="'+route.strava+'" target="_blank" rel="noopener">Strava segment</a>' : "");
     wx = await P.fetchWeather(geo, 7, route.tz);
     renderAll();
