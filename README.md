@@ -25,7 +25,7 @@ favicon.svg, apple-touch-icon.png
    - `factor`: model tuning from a real effort (0.92 for Griffith, 0.75 for Powell). Without one, 0.9 for climbs, 0.75 for sprints.
    - `shelter`: share of the 10 m forecast wind felt at rider height (0.5 sheltered climb, 0.65 open road)
    - `thresh`: seconds of help needed for a "Yes" (5 for a 15 min climb, 1 for a 30 s sprint)
-   - optional `groupRide: { name, dow, hour }` and `tz` (defaults to America/Los_Angeles)
+   - optional `titleName` (page heading wording when the Strava name reads oddly), optional `groupRide: { name, dow, hour }` and `tz` (defaults to America/Los_Angeles)
    - `pts`: `[lat, lon, elevation_m]` from start to finish
 2. Add the route to `ROUTES` in `build/make_pages.py` and run `python3 build/make_pages.py` from the site folder.
    That writes `<id>/index.html` from `build/route-template.html`.

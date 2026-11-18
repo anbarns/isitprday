@@ -17,6 +17,8 @@ ROUTES = [
   dict(id="powell", name="Powell Sprint", short="Powell", kind="sprint"),
   dict(id="lida", name="Lida Climb", short="Lida", kind="climb"),
   dict(id="mt-washington", name="Mount Washington Drive", short="Mt. Washington", kind="climb"),
+  dict(id="bridge-north", name="Deception Pass Bridge - North", short="Deception Pass Bridge - North", kind="sprint"),
+  dict(id="bridge-south", name="Deception Pass Bridge - South", short="Deception Pass Bridge - South", kind="sprint"),
 ]
 
 for r in ROUTES:
