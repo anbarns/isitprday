@@ -16,6 +16,7 @@ ROUTES = [
   dict(id="griffith", name="Griffith Park Hill Climb", short="Griffith", kind="climb"),
   dict(id="powell", name="Powell Sprint", short="Powell", kind="sprint"),
   dict(id="lida", name="Lida Climb", short="Lida", kind="climb"),
+  dict(id="mt-washington", name="Mount Washington Drive", short="Mt. Washington", kind="climb"),
 ]
 
 for r in ROUTES:
